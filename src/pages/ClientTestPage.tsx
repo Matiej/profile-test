@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getClientTest } from "./apiClientTest";
+import { getClientTest, submitClientTest } from "./apiClientTest";
 import type {
   ClientTestDto,
   PreparedQuestion,
   QuestionAnswer,
   AnswerValue,
+  ClientTestSubmissionPayload,
 } from "./../types/ClientTestDto";
 import { ApiError } from "./../lib/httpClient";
 
@@ -16,8 +17,35 @@ import Button from "react-bootstrap/Button";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import Container from "react-bootstrap/Container";
 import clsx from "clsx";
+import type { ClientTestAnswer } from "../types/ClientTestDto";
+import { NotFoundPage } from "./NotFoundPage";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 type Phase = "intro" | "in-progress" | "finished";
+
+// const SCALE_OPTIONS: {
+//   value: AnswerValue;
+//   label: string;
+//   variant: string;
+//   color: string;
+// }[] = [
+//   {
+//     value: -2,
+//     label: "Zdecydowanie bardziej LEWY",
+//     variant: "danger",
+//     color: "#ef4444",
+//   },
+//   { value: -1, label: "Bardziej LEWY", variant: "warning", color: "#f97316" },
+//   { value: 0, label: "Pośrodku", variant: "secondary", color: "#64748b" },
+//   { value: 1, label: "Bardziej PRAWY", variant: "success", color: "#22c55e" },
+//   {
+//     value: 2,
+//     label: "Zdecydowanie bardziej PRAWY",
+//     variant: "primary",
+//     color: "#0ea5e9",
+//   },
+// ];
 
 const SCALE_OPTIONS: {
   value: AnswerValue;
@@ -29,16 +57,31 @@ const SCALE_OPTIONS: {
     value: -2,
     label: "Zdecydowanie bardziej LEWY",
     variant: "danger",
-    color: "#ef4444",
+    color: "#ef4444", // mocny czerwony
   },
-  { value: -1, label: "Bardziej LEWY", variant: "warning", color: "#f97316" },
-  { value: 0, label: "Pośrodku", variant: "secondary", color: "#64748b" },
-  { value: 1, label: "Bardziej PRAWY", variant: "success", color: "#22c55e" },
+  {
+    value: -1,
+    label: "Bardziej LEWY",
+    variant: "danger",
+    color: "#fecaca", // jasny czerwony
+  },
+  {
+    value: 0,
+    label: "Pośrodku",
+    variant: "secondary",
+    color: "#64748b", // szary – zostaje
+  },
+  {
+    value: 1,
+    label: "Bardziej PRAWY",
+    variant: "primary",
+    color: "#bfdbfe", // jasny niebieski
+  },
   {
     value: 2,
     label: "Zdecydowanie bardziej PRAWY",
     variant: "primary",
-    color: "#0ea5e9",
+    color: "#0ea5e9", // mocny niebieski
   },
 ];
 
@@ -55,12 +98,18 @@ export function ClientTestPage() {
 
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const isLoading = !rawData && !error && !notFound;
 
   // ---- pobieranie testu ----
 
   useEffect(() => {
+    if (!publicToken) {
+      setNotFound(true);
+      return;
+    }
+
     getClientTest(publicToken!)
       .then((res) => {
         setRawData(res);
@@ -89,11 +138,9 @@ export function ClientTestPage() {
 
         setQuestions(prepared);
         setAnswers(
-          prepared.map((q) => ({
-            questionId: q.id,
+          prepared.map((preparedQuestion) => ({
+            statementKey: preparedQuestion.statementKey,
             value: null,
-            leftKind: q.leftKind,
-            rightKind: q.rightKind,
           }))
         );
         setPhase("intro");
@@ -113,7 +160,7 @@ export function ClientTestPage() {
   }, [publicToken]);
 
   const total = questions.length;
-  const current = questions[currentIndex];
+  const currentQuestion = questions[currentIndex];
 
   const progressPercent = useMemo(() => {
     if (!total) return 0;
@@ -124,10 +171,10 @@ export function ClientTestPage() {
   const handleStart = () => setPhase("in-progress");
 
   const handleAnswerChange = (val: AnswerValue) => {
-    if (!current) return;
+    if (!currentQuestion) return;
     setAnswers((prev) =>
       prev.map((a) =>
-        a.questionId === current.id
+        a.statementKey === currentQuestion.statementKey
           ? {
               ...a,
               value: val,
@@ -167,14 +214,7 @@ export function ClientTestPage() {
   }
 
   if (notFound) {
-    return (
-      <div className="test-shell d-flex align-items-center">
-        <Container className="text-center">
-          <h1>Strona nie została znaleziona.</h1>
-          <p>Wygląda na to, że niczego tutaj nie ma.</p>
-        </Container>
-      </div>
-    );
+    return <NotFoundPage />;
   }
 
   if (error) {
@@ -252,9 +292,65 @@ export function ClientTestPage() {
   }
 
   // ==== EKRAN PYTANIA ====
-  const currentAnswer = answers[currentIndex];
-  const isCurrentAnswered = currentAnswer.value !== null;
+  const currentAnswer = answers.find(
+    (a) => a.statementKey === currentQuestion?.statementKey
+  );
 
+  const isCurrentAnswered = currentAnswer?.value !== null;
+
+  //   function toScoring(question: PreparedQuestion, value: AnswerValue): number {
+  //     const limitingOnLeft = question.leftKind === "limiting";
+  //     const factor = limitingOnLeft ? 1 : -1;
+  //     return value * factor;
+  //   }
+  function toScoring(value: AnswerValue): number {
+    return value;
+  }
+
+  const limitingOnLeft = currentQuestion.leftKind === "limiting";
+  const scaleOptions = limitingOnLeft
+    ? SCALE_OPTIONS
+    : [...SCALE_OPTIONS].reverse();
+
+  const handleFinish = async () => {
+    if (!rawData) return;
+
+    // kontrolnie: wszystkie odpowiedzi muszą być
+    const allAnswered = answers.every((a) => a.value !== null);
+    if (!allAnswered) {
+      // opcjonalnie pokaż komunikat, że coś pominęli
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const clientTestAnswers: ClientTestAnswer[] = questions.map((q) => {
+        const ans = answers.find((a) => a.statementKey === q.statementKey);
+        const val = ans?.value ?? 0;
+
+        return {
+          statementKey: q.statementKey,
+          scoring: toScoring(val as AnswerValue),
+        };
+      });
+
+      const payload: ClientTestSubmissionPayload = {
+        submissionId: rawData.submissionId,
+        publicToken: rawData.publicToken,
+        clientTestAnswers: clientTestAnswers,
+      };
+
+      await submitClientTest(payload);
+      setPhase("finished");
+    } catch (e) {
+      console.error(e);
+      setError("Nie udało się zapisać odpowiedzi. Spróbuj ponownie.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
   return (
     <div className="test-shell">
       <Container className="test-card">
@@ -272,15 +368,32 @@ export function ClientTestPage() {
         {/* Karta pytania */}
         <Card className="test-question-card border-0">
           <Card.Body className="p-4 p-md-5">
-            <div className="d-flex flex-column flex-md-row gap-4 mt-2">
+            {/* <div className="d-flex flex-column flex-md-row gap-4 mt-2">
               <div className="flex-grow-1">
-                <div className="fw-semibold fs-5">{current.leftText}</div>
+                <div className="fw-semibold fs-5">
+                  {currentQuestion.leftText}
+                </div>
               </div>
 
               <div className="flex-grow-1">
-                <div className="fw-semibold fs-5">{current.rightText}</div>
+                <div className="fw-semibold fs-5">
+                  {currentQuestion.rightText}
+                </div>
               </div>
-            </div>
+            </div> */}
+
+            <Row className="mt-2 align-items-start">
+              <Col md={6} className="text-start">
+                <div className="fw-semibold fs-5">
+                  {currentQuestion.leftText}
+                </div>
+              </Col>
+              <Col md={6} className="text-end">
+                <div className="fw-semibold fs-5">
+                  {currentQuestion.rightText}
+                </div>
+              </Col>
+            </Row>
 
             {/* Skala z kolorowymi kulkami – BEZ liczb */}
             <div className="mt-4 d-flex flex-column align-items-center">
@@ -289,8 +402,8 @@ export function ClientTestPage() {
               </div>
 
               <div className="d-flex gap-3 flex-wrap justify-content-center mb-2">
-                {SCALE_OPTIONS.map((opt) => {
-                  const isSelected = currentAnswer.value === opt.value;
+                {scaleOptions.map((opt) => {
+                  const isSelected = currentAnswer?.value === opt.value;
                   const bg = isSelected ? opt.color : `${opt.color}20`;
                   const border = isSelected ? opt.color : `${opt.color}40`;
 
@@ -310,7 +423,6 @@ export function ClientTestPage() {
                       }}
                       onClick={() => handleAnswerChange(opt.value)}
                     >
-                      {/* wewnętrzna kropka */}
                       <span
                         style={{
                           width: 14,
@@ -344,8 +456,8 @@ export function ClientTestPage() {
               </Button>
               <Button
                 variant="primary"
-                onClick={handleNext}
-                disabled={!isCurrentAnswered} // <-- blokada
+                onClick={currentIndex === total - 1 ? handleFinish : handleNext}
+                disabled={!isCurrentAnswered || submitting} // <-- blokada
               >
                 {currentIndex === total - 1 ? "Zakończ test" : "Dalej"}
               </Button>
