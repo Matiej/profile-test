@@ -1,6 +1,6 @@
 export type ClientQuestionDto = {
     id: string;
-    questionKey: string;
+    statementKey: string;
     statementCategory: string;
     supportingStatement: string;
     limitingStatement: string;
@@ -27,8 +27,17 @@ export type PreparedQuestion = ClientQuestionDto & {
 };
 
 export type QuestionAnswer = {
-    questionId: string;
+    statementKey: string;
     value: AnswerValue | null;
-    leftKind: StatementKind;
-    rightKind: StatementKind;
+};
+
+export type ClientTestAnswer = {
+    statementKey: string;
+    scoring: number;
+};
+
+export type ClientTestSubmissionPayload = {
+    submissionId: string;
+    publicToken: string;
+    clientTestAnswers: ClientTestAnswer[];
 };
