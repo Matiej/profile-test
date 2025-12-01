@@ -1,0 +1,114 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  --brand-bg: #f9f9f5;
+  --brand-surface: #ffffff;
+  --brand-primary: #465344;
+  --brand-primary-soft: #5a6a56;
+  --brand-muted: #94a3b8;
+
+  color: #1f2933;
+  background-color: var(--brand-bg);
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--brand-bg);
+}
+
+#rooot {
+  min-height: 100vh;
+}
+
+/* Linki */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* NASZE KLASY TESTU */
+
+.test-shell {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #f1f3f9 0, var(--brand-bg) 45%);
+  padding: 2.5rem 0 3rem;
+}
+
+.test-card {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.test-question-card {
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.test-scale-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.8rem;
+  border: 2px solid #e2e8f0;
+  background-color: #f8fafc;
+  transition: all 0.15s ease-in-out;
+}
+
+.test-scale-circle--negative {
+  background-color: rgba(248, 113, 113, 0.08); /* blady czerwony */
+  border-color: rgba(248, 113, 113, 0.25);
+}
+
+.test-scale-circle--positive {
+  background-color: rgba(45, 212, 191, 0.08); /* blady turkus */
+  border-color: rgba(45, 212, 191, 0.25);
+}
+
+.test-scale-circle--active {
+  box-shadow: 0 0 0 4px rgba(70, 83, 68, 0.15);
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: #ffffff;
+}
+
+.test-scale-labels {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.btn-primary {
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--brand-primary-soft);
+  border-color: var(--brand-primary-soft);
+}
+
+.progress-bar {
+  background-color: var(--brand-primary);
+}
