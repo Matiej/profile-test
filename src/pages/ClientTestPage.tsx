@@ -189,8 +189,6 @@ export function ClientTestPage() {
       setCurrentIndex((idx) => idx + 1);
     } else {
       setPhase("finished");
-      console.log("Answers ready to send:", answers);
-      // tu później wyślemy POST
     }
   };
 
