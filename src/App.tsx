@@ -9,7 +9,13 @@ function App() {
   return (
     // DEV: bez basename. W PROD ustawimy basename="/pt"
     <BrowserRouter>
-      <Navbar bg="light" className="mb-4">
+      <Navbar
+        className="mb-4"
+        style={{
+          backgroundColor: "var(--brand-cloud)",
+          borderBottom: "1px solid var(--brand-mist)",
+        }}
+      >
         <Container className="d-flex flex-column align-items-center py-3">
           <Link
             to="https://agnieszkakotlonek.pl/"
@@ -26,9 +32,9 @@ function App() {
           <Navbar.Brand
             className="mt-2 text-center"
             style={{
-              fontWeight: 650,
-              textShadow: "0 2px 5px rgba(0,0,0,0.15)",
-              letterSpacing: "0.8px",
+              fontWeight: 600,
+              color: "var(--brand-ink)",
+              letterSpacing: "0.5px",
             }}
           >
             Agnieszka Kotlonek – Hipnoterapia w Biznesie
