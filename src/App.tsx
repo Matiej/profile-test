@@ -7,7 +7,6 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 
 function App() {
   return (
-    // DEV: bez basename. W PROD ustawimy basename="/pt"
     <BrowserRouter>
       <Navbar
         className="mb-4"
