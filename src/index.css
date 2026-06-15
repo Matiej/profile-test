@@ -32,13 +32,6 @@
   font-display: swap;
 }
 
-.logo-link img {
-  height: 40px;
-  width: auto;
-  margin: 0;
-  padding: 0;
-}
-
 :root {
   font-family: "Strawford", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     Roboto, Arial, sans-serif;
@@ -48,8 +41,9 @@
   /* ===== KOLORY BRAND ===== */
   --brand-cloud: #ECF1F6;      /* tło główne */
   --brand-mist: #C0CCD9;       /* akcenty, bordery */
-  --brand-ink: #5A082D;        /* tekst główny, primary dark */
-  --brand-berry: #860841;      /* primary, przyciski */
+  --brand-ink: #5A082D;        /* ciemny bordowy – akcenty, primary dark */
+  --brand-berry: #860841;      /* primary, przyciski, tytuły kart */
+  --brand-text: #1f1f1f;       /* tekst główny – czarny (jak na mockupach) */
 
   /* aliasy dla kompatybilności */
   --brand-bg: var(--brand-cloud);
@@ -58,7 +52,7 @@
   --brand-primary-soft: var(--brand-ink);
   --brand-muted: #64748b;
 
-  color: var(--brand-ink);
+  color: var(--brand-text);
   background-color: var(--brand-bg);
 
   text-rendering: optimizeLegibility;
@@ -71,7 +65,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: var(--brand-bg);
-  color: var(--brand-ink);
+  color: var(--brand-text);
 }
 
 #rooot {
@@ -87,20 +81,111 @@ a:hover {
   text-decoration: underline;
 }
 
+/* ===== GÓRNA BELKA ===== */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  padding: 1.25rem 2.5rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--brand-mist);
+}
+
+.top-bar__name {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--brand-text);
+  font-size: 1.25rem;
+}
+
+.top-bar__tagline {
+  font-weight: 500;
+  color: var(--brand-text);
+  font-size: 1.1rem;
+}
+
 /* ===== KLASY TESTU ===== */
 
 .test-shell {
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at 90% 0%, rgba(134, 8, 65, 0.05) 0, transparent 50%),
-    radial-gradient(circle at 10% 100%, rgba(192, 204, 217, 0.3) 0, transparent 50%),
-    var(--brand-cloud);
+  min-height: calc(100vh - 72px);
   padding: 2.5rem 0 3rem;
+}
+
+/* Tło – chmury (powitanie, zakończenie) */
+.test-shell--clouds {
+  background-image: url("./assets/images/background.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  padding-top: 4.5rem; /* całość (karta + przycisk) niżej */
+}
+
+/* Tło – szare z palety (#c0ccd9) – demo i test właściwy */
+.test-shell--mist {
+  background-color: var(--brand-mist);
 }
 
 .test-card {
   max-width: 960px;
   margin: 0 auto;
+}
+
+.test-card--narrow {
+  max-width: 860px;
+}
+
+/* Karta tekstowa (powitanie / zakończenie) */
+.test-info-card {
+  border-radius: 24px;
+  background-color: #ffffff;
+  box-shadow: 0 10px 30px rgba(90, 8, 45, 0.08);
+}
+
+.test-info-card p {
+  font-size: 1.155rem; /* +10% */
+}
+
+/* Tytuł sekcji – berry, uppercase */
+.test-section-title {
+  color: var(--brand-berry);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 400;
+  font-size: 1.75rem;
+  margin-bottom: 4.25rem; /* odstęp tytuł → reszta tekstu (-5% x3) */
+}
+
+/* Akapit główny → akapit „Zaufaj…”: o jeden „enter” niżej */
+.test-lead-gap {
+  margin-bottom: 2.65rem;
+}
+
+/* Karta tekstowa – większe odstępy góra/dół wokół treści */
+.test-info-card__body {
+  padding-top: 3.5rem;
+  padding-bottom: 4.43rem; /* dolny margines sekcji +15% */
+  padding-left: 1.575rem; /* boczne odstępy +5% */
+  padding-right: 1.575rem;
+}
+
+@media (min-width: 768px) {
+  .test-info-card__body {
+    padding-top: 4.5rem;
+    padding-bottom: 5.69rem; /* dolny margines sekcji +15% */
+    padding-left: 3.15rem; /* boczne odstępy +5% */
+    padding-right: 3.15rem;
+  }
+}
+
+/* Atrapa demo – całość nieklikalna */
+.test-demo {
+  pointer-events: none;
+  user-select: none;
 }
 
 .test-question-card {
@@ -165,6 +250,31 @@ a:hover {
   background-color: var(--brand-mist);
   border-color: var(--brand-mist);
   opacity: 0.6;
+}
+
+/* Duże przyciski CTA (DALEJ / ROZPOCZNIJ) – pełna pigułka, ciemny bordowy */
+.btn-lg {
+  border-radius: 999px;
+  padding: 0.4rem 6.9rem; /* dłuższy i cieńszy */
+  font-weight: 500;
+  letter-spacing: 1px;
+  font-size: 1rem; /* napis -20% (z 1.25rem) */
+}
+
+/* Odstęp karta → przycisk CTA (+10%) */
+.test-cta {
+  margin-top: 3.63rem;
+}
+
+.btn-primary.btn-lg {
+  background-color: var(--brand-ink);
+  border-color: var(--brand-ink);
+}
+
+.btn-primary.btn-lg:hover,
+.btn-primary.btn-lg:focus {
+  background-color: var(--brand-berry);
+  border-color: var(--brand-berry);
 }
 
 .btn-outline-secondary {

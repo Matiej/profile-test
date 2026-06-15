@@ -22,30 +22,7 @@ import { NotFoundPage } from "./NotFoundPage";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
-type Phase = "intro" | "in-progress" | "finished";
-
-// const SCALE_OPTIONS: {
-//   value: AnswerValue;
-//   label: string;
-//   variant: string;
-//   color: string;
-// }[] = [
-//   {
-//     value: -2,
-//     label: "Zdecydowanie bardziej LEWY",
-//     variant: "danger",
-//     color: "#ef4444",
-//   },
-//   { value: -1, label: "Bardziej LEWY", variant: "warning", color: "#f97316" },
-//   { value: 0, label: "Pośrodku", variant: "secondary", color: "#64748b" },
-//   { value: 1, label: "Bardziej PRAWY", variant: "success", color: "#22c55e" },
-//   {
-//     value: 2,
-//     label: "Zdecydowanie bardziej PRAWY",
-//     variant: "primary",
-//     color: "#0ea5e9",
-//   },
-// ];
+type Phase = "welcome" | "demo" | "in-progress" | "finished";
 
 const SCALE_OPTIONS: {
   value: AnswerValue;
@@ -90,11 +67,9 @@ export function ClientTestPage() {
 
   const [rawData, setRawData] = useState<ClientTestDto | null>(null);
   const [questions, setQuestions] = useState<PreparedQuestion[]>([]);
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [phase, setPhase] = useState<Phase>("welcome");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<QuestionAnswer[]>([]);
-
-  //   const [loading, setLoading] = useState(true);
 
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,7 +118,7 @@ export function ClientTestPage() {
             value: null,
           }))
         );
-        setPhase("intro");
+        setPhase("welcome");
         setCurrentIndex(0);
       })
       .catch((err) => {
@@ -168,7 +143,12 @@ export function ClientTestPage() {
     return Math.round((answeredCount / total) * 100);
   }, [answers, total]);
 
-  const handleStart = () => setPhase("in-progress");
+  const handleGoToDemo = () => setPhase("demo");
+
+  const handleStart = () => {
+    setCurrentIndex(0);
+    setPhase("in-progress");
+  };
 
   const handleAnswerChange = (val: AnswerValue) => {
     if (!currentQuestion) return;
@@ -202,7 +182,7 @@ export function ClientTestPage() {
 
   if (isLoading) {
     return (
-      <div className="test-shell d-flex align-items-center">
+      <div className="test-shell test-shell--mist d-flex align-items-center">
         <Container className="text-center">
           <Spinner animation="border" role="status" />
           <div className="mt-3">Ładuję test…</div>
@@ -217,7 +197,7 @@ export function ClientTestPage() {
 
   if (error) {
     return (
-      <div className="test-shell d-flex align-items-center">
+      <div className="test-shell test-shell--mist d-flex align-items-center">
         <Container>
           <Alert variant="danger">{error}</Alert>
         </Container>
@@ -229,39 +209,130 @@ export function ClientTestPage() {
     return null;
   }
 
-  // ==== INTRO ====
-  if (phase === "intro") {
+  // ==== POWITANIE ====
+  if (phase === "welcome") {
     return (
-      <div className="test-shell">
-        <Container className="test-card">
-          <Card className="test-question-card border-0">
-            <Card.Body className="p-4 p-md-5 text-center">
-              <h5 className="mb-3 text-muted">
-                Agnieszka Kotlonek – Hipnoterapia w Biznesie
-              </h5>
-              <h2 className="mb-3">{rawData.testName}</h2>
+      <div className="test-shell test-shell--clouds">
+        <Container className="test-card test-card--narrow">
+          <Card className="test-info-card border-0">
+            <Card.Body className="test-info-card__body">
+              <h2 className="test-section-title text-center">
+                Profil świadomości finansowej
+              </h2>
 
-              {/* stały tekst – tu Agutka może wkleić swój opis */}
-              <p className="mb-3">
-                Tutaj wchodzi stały tekst z instrukcją – spokojnie, bez złych
-                odpowiedzi. Zaznaczasz to, co jest najbliżej Twojego odczucia.
+              <p className="test-lead-gap">
+                Przed Tobą {total} par stwierdzeń o pieniądzach
+                i biznesie. Przy każdej parze wybierz zdanie, które opisuje, jak
+                myślisz i zachowujesz się na co dzień. Niektóre pary mogą wydać
+                Ci się podobne - to zamierzone, wybieraj mimo to.
               </p>
 
-              {rawData.descriptionBefore && (
-                <p className="text-muted mb-4">{rawData.descriptionBefore}</p>
-              )}
-
-              <p className="mb-4">
-                Ten test składa się z <strong>{total}</strong> par stwierdzeń.
-                Przy każdej z nich wybierzesz, czy bliżej Ci do tekstu po lewej,
-                czy po prawej stronie.
+              <p className="mb-0">
+                <strong>Zaufaj pierwszej myśli.</strong> Wypełnienie zajmie
+                około 20–25 minut.
               </p>
-
-              <Button size="lg" onClick={handleStart}>
-                Rozpocznij test
-              </Button>
             </Card.Body>
           </Card>
+
+          <div className="text-center test-cta">
+            <Button size="lg" onClick={handleGoToDemo}>
+              DALEJ
+            </Button>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+
+  // ==== DEMO – statyczny podgląd „jak to działa” ====
+  if (phase === "demo") {
+    return (
+      <div className="test-shell test-shell--mist">
+        <Container className="test-card">
+          <h4 className="text-center mb-4">
+            Zanim zaczniesz, zobacz jak to działa.
+          </h4>
+
+          {/* Atrapa karty pytania – w pełni statyczna, nieklikalna */}
+          <div className="test-demo" aria-hidden="true">
+            <div className="mb-3">
+              <div className="d-flex justify-content-between mb-1">
+                <span className="small text-muted">1%</span>
+                <span className="small text-muted">Krok 2 z {total}</span>
+              </div>
+              <ProgressBar now={1} />
+            </div>
+
+            <Card className="test-question-card border-0">
+              <Card.Body className="p-4 p-md-5">
+                <Row className="mt-2 align-items-start">
+                  <Col md={6} className="text-start">
+                    <div className="fw-semibold fs-5">
+                      Zaczynam dzień od planu.
+                    </div>
+                  </Col>
+                  <Col md={6} className="text-end">
+                    <div className="fw-semibold fs-5">
+                      Zaczynam dzień od kawy, a potem zobaczymy.
+                    </div>
+                  </Col>
+                </Row>
+
+                <div className="mt-4 d-flex flex-column align-items-center">
+                  <div className="d-flex gap-3 flex-wrap justify-content-center mb-2">
+                    {SCALE_OPTIONS.map((opt) => {
+                      const isSelected = opt.value === 0;
+                      const bg = isSelected ? opt.color : `${opt.color}20`;
+                      const border = isSelected ? opt.color : `${opt.color}40`;
+
+                      return (
+                        <span
+                          key={opt.value}
+                          className="test-scale-circle"
+                          style={{
+                            backgroundColor: bg,
+                            border: `2px solid ${border}`,
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: 14,
+                              height: 14,
+                              borderRadius: "999px",
+                              display: "block",
+                              backgroundColor: isSelected
+                                ? "white"
+                                : `${opt.color}80`,
+                            }}
+                          />
+                        </span>
+                      );
+                    })}
+                  </div>
+
+                  <div className="d-flex justify-content-between w-100 test-scale-labels">
+                    <span>Bliżej LEWEGO stwierdzenia</span>
+                    <span>Bliżej PRAWEGO stwierdzenia</span>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-between mt-4">
+                  <Button variant="outline-secondary" disabled>
+                    Wstecz
+                  </Button>
+                  <Button variant="primary" disabled>
+                    Dalej
+                  </Button>
+                </div>
+              </Card.Body>
+            </Card>
+          </div>
+
+          <div className="text-center mt-4">
+            <Button size="lg" onClick={handleStart}>
+              ROZPOCZNIJ
+            </Button>
+          </div>
         </Container>
       </div>
     );
@@ -270,18 +341,30 @@ export function ClientTestPage() {
   // ==== ZAKOŃCZENIE ====
   if (phase === "finished") {
     return (
-      <div className="test-shell">
-        <Container className="test-card">
-          <Card className="test-question-card border-0">
-            <Card.Body className="p-4 p-md-5 text-center">
-              <h2>Dziękujemy za wypełnienie testu</h2>
-              {rawData.descriptionAfter && (
-                <p className="mt-3">{rawData.descriptionAfter}</p>
-              )}
-              <p className="mt-3 text-muted">
-                Tutaj później pojawi się informacja, co dalej – np. kiedy
-                otrzymasz wynik, link do konsultacji itd.
+      <div className="test-shell test-shell--clouds">
+        <Container className="test-card test-card--narrow">
+          <Card className="test-info-card border-0">
+            <Card.Body className="test-info-card__body">
+              <h2 className="test-section-title text-center">
+                Profil świadomości finansowej
+              </h2>
+
+              <p className="mb-3">
+                <strong>Dziękuję, że mi zaufałaś.</strong>
               </p>
+
+              <p className="mb-3">
+                Wypełnienie tego profilu wymaga odwagi i szczerości wobec siebie
+                i właśnie to zrobiłaś.
+              </p>
+
+              <p className="mb-3">
+                Twoje odpowiedzi są teraz u mnie. W ciągu 48 godzin
+                przeanalizuję je i wyślę Ci wynik na adres e-mail, który
+                podałaś.
+              </p>
+
+              <p className="mb-0">Agnieszka Kotlonek-Wójcik</p>
             </Card.Body>
           </Card>
         </Container>
@@ -296,11 +379,6 @@ export function ClientTestPage() {
 
   const isCurrentAnswered = currentAnswer?.value !== null;
 
-  //   function toScoring(question: PreparedQuestion, value: AnswerValue): number {
-  //     const limitingOnLeft = question.leftKind === "limiting";
-  //     const factor = limitingOnLeft ? 1 : -1;
-  //     return value * factor;
-  //   }
   function toScoring(value: AnswerValue): number {
     return value;
   }
@@ -349,8 +427,9 @@ export function ClientTestPage() {
       setSubmitting(false);
     }
   };
+
   return (
-    <div className="test-shell">
+    <div className="test-shell test-shell--mist">
       <Container className="test-card">
         {/* Pasek postępu */}
         <div className="mb-3">
@@ -366,20 +445,6 @@ export function ClientTestPage() {
         {/* Karta pytania */}
         <Card className="test-question-card border-0">
           <Card.Body className="p-4 p-md-5">
-            {/* <div className="d-flex flex-column flex-md-row gap-4 mt-2">
-              <div className="flex-grow-1">
-                <div className="fw-semibold fs-5">
-                  {currentQuestion.leftText}
-                </div>
-              </div>
-
-              <div className="flex-grow-1">
-                <div className="fw-semibold fs-5">
-                  {currentQuestion.rightText}
-                </div>
-              </div>
-            </div> */}
-
             <Row className="mt-2 align-items-start">
               <Col md={6} className="text-start">
                 <div className="fw-semibold fs-5">
@@ -395,10 +460,6 @@ export function ClientTestPage() {
 
             {/* Skala z kolorowymi kulkami – BEZ liczb */}
             <div className="mt-4 d-flex flex-column align-items-center">
-              <div className="mb-2">
-                Na ile bliżej Ci do lewej, a na ile do prawej?
-              </div>
-
               <div className="d-flex gap-3 flex-wrap justify-content-center mb-2">
                 {scaleOptions.map((opt) => {
                   const isSelected = currentAnswer?.value === opt.value;
@@ -455,7 +516,7 @@ export function ClientTestPage() {
               <Button
                 variant="primary"
                 onClick={currentIndex === total - 1 ? handleFinish : handleNext}
-                disabled={!isCurrentAnswered || submitting} // <-- blokada
+                disabled={!isCurrentAnswered || submitting}
               >
                 {currentIndex === total - 1 ? "Zakończ test" : "Dalej"}
               </Button>
