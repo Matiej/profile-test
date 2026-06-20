@@ -1,73 +1,111 @@
-# React + TypeScript + Vite
+# Profile Test (frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend testu „Profil świadomości finansowej" — aplikacja, w której klient
+wypełnia test (pary stwierdzeń ocenianych na skali), a odpowiedzi trafiają do
+backendu. Wejście do testu odbywa się przez link z tokenem:
+`/t/<publicToken>`.
 
-Currently, two official plugins are available:
+## Stack technologiczny
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 19** + **TypeScript** (`~5.9`)
+- **Vite 7** — dev server, build i bundling
+- **React Router DOM 7** — routing (`/t/:publicToken`)
+- **React-Bootstrap 2** + **Bootstrap 5** — komponenty UI i style
+- **clsx** — warunkowe klasy CSS
+- **Vitest 4** + **Testing Library** (`@testing-library/react`,
+  `user-event`, `jest-dom`) + **jsdom** — testy
 
-## React Compiler
+## Wymagania
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Node.js**: `20.19+` lub `22.12+` (wymóg Vite 7). Rekomendowane LTS 22 lub
+  nowsze (projekt rozwijany na Node 24).
+- **npm** `10+` (dostarczany z powyższymi wersjami Node).
 
-## Expanding the ESLint configuration
+Sprawdzenie wersji:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+node -v
+npm -v
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Konfiguracja środowiska
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Zmienne środowiskowe (prefiks `VITE_`) trzymane są w plikach `.env`.
+Skopiuj szablon i dostosuj:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env.local
+```
+
+| Zmienna         | Domyślnie | Opis                                                        |
+| --------------- | --------- | ----------------------------------------------------------- |
+| `VITE_API_BASE` | `/api`    | Bazowy URL backendu. Lokalnie `/api` jest proxowane przez Vite na `http://localhost:8100` (patrz `vite.config.ts`). |
+
+## Uruchomienie lokalne
+
+1. Instalacja zależności:
+
+   ```bash
+   npm install
+   ```
+
+2. Dev server (HMR) na porcie **3210**:
+
+   ```bash
+   npm run dev
+   ```
+
+   Aplikacja: `http://localhost:3210/t/<publicToken>`
+   (np. `http://localhost:3210/t/abc123`). Każda inna ścieżka → strona 404.
+
+> Backend musi działać na `http://localhost:8100` (lub zmień `VITE_API_BASE`),
+> bo żądania `/api/...` są tam proxowane.
+
+## Build i podgląd produkcyjny
+
+```bash
+npm run build        # typecheck (tsc -b) + build produkcyjny
+npm run build:dev    # build w trybie 'dev'
+npm run build:prod   # build w trybie 'prod'
+npm run preview      # lokalny podgląd zbudowanej aplikacji (z katalogu dist)
+```
+
+## Testy
+
+```bash
+npm test             # jednorazowe uruchomienie (vitest run)
+npm run test:watch   # tryb watch (vitest)
+```
+
+Pojedynczy plik / wzorzec nazwy:
+
+```bash
+npx vitest run src/pages/ClientTestPage.test.tsx
+npx vitest run -t "fallback"
+```
+
+Konfiguracja testów: blok `test` w `vite.config.ts`
+(środowisko `jsdom`, globalne API, `setupFiles: ./src/test/setup.ts`).
+
+## Lint i typy
+
+```bash
+npm run lint                          # ESLint
+npx tsc -p tsconfig.app.json --noEmit # sprawdzenie typów bez emisji
+```
+
+## Struktura (skrót)
+
+```
+src/
+  App.tsx                 # routing (/t/:publicToken)
+  main.tsx                # punkt wejścia
+  index.css               # style + zmienne brand
+  lib/httpClient.ts       # fetch + ApiError
+  pages/
+    ClientTestPage.tsx    # główny ekran testu (welcome → demo → pytania → koniec)
+    apiClientTest.ts      # wywołania API (getClientTest, submitClientTest)
+    NotFoundPage.tsx
+  types/ClientTestDto.ts  # typy DTO
+  test/setup.ts           # setup Testing Library
 ```

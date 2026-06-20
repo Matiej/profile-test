@@ -32,13 +32,6 @@
   font-display: swap;
 }
 
-.logo-link img {
-  height: 40px;
-  width: auto;
-  margin: 0;
-  padding: 0;
-}
-
 :root {
   font-family: "Strawford", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     Roboto, Arial, sans-serif;
@@ -48,8 +41,9 @@
   /* ===== KOLORY BRAND ===== */
   --brand-cloud: #ECF1F6;      /* tło główne */
   --brand-mist: #C0CCD9;       /* akcenty, bordery */
-  --brand-ink: #5A082D;        /* tekst główny, primary dark */
-  --brand-berry: #860841;      /* primary, przyciski */
+  --brand-ink: #5A082D;        /* ciemny bordowy – akcenty, primary dark */
+  --brand-berry: #860841;      /* primary, przyciski, tytuły kart */
+  --brand-text: #1f1f1f;       /* tekst główny – czarny (jak na mockupach) */
 
   /* aliasy dla kompatybilności */
   --brand-bg: var(--brand-cloud);
@@ -58,7 +52,7 @@
   --brand-primary-soft: var(--brand-ink);
   --brand-muted: #64748b;
 
-  color: var(--brand-ink);
+  color: var(--brand-text);
   background-color: var(--brand-bg);
 
   text-rendering: optimizeLegibility;
@@ -71,7 +65,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: var(--brand-bg);
-  color: var(--brand-ink);
+  color: var(--brand-text);
 }
 
 #rooot {
@@ -87,20 +81,137 @@ a:hover {
   text-decoration: underline;
 }
 
+/* ===== GÓRNA BELKA ===== */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  padding: 1.25rem 2.5rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--brand-mist);
+}
+
+.top-bar__name {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--brand-text);
+  font-size: 1.25rem;
+}
+
+.top-bar__tagline {
+  font-weight: 500;
+  color: var(--brand-text);
+  font-size: 1.1rem;
+}
+
 /* ===== KLASY TESTU ===== */
 
 .test-shell {
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at 90% 0%, rgba(134, 8, 65, 0.05) 0, transparent 50%),
-    radial-gradient(circle at 10% 100%, rgba(192, 204, 217, 0.3) 0, transparent 50%),
-    var(--brand-cloud);
-  padding: 2.5rem 0 3rem;
+  min-height: calc(100vh - 72px);
+  padding: 2.5rem 1.5rem 3rem;
+}
+
+/* Tło – chmury (powitanie, zakończenie) */
+.test-shell--clouds {
+  background-image: url("./assets/images/background.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  /* Centrowanie całości (karta + przycisk) – scroll-safe (margin:auto na dziecku).
+     min-height = 100vh − belka, więc odstęp góra (od belki) = dół,
+     a poziome centrowanie daje lewo = prawo. */
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem; /* równy odstęp ze wszystkich stron */
+}
+
+/* Tło – jasne z palety (#ecf1f6) – demo i test właściwy */
+.test-shell--mist {
+  background-color: var(--brand-cloud);
+
+  /* Wariant B: centrowanie w pionie przez margin:auto na dziecku (scroll-safe) */
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem; /* równy odstęp ze wszystkich stron */
 }
 
 .test-card {
   max-width: 960px;
   margin: 0 auto;
+}
+
+/* Scroll-safe centrowanie zawartości w obu typach plansz:
+   gdy jest miejsce – wyśrodkowane; gdy treść wyższa niż okno – scroll bez ucinania */
+.test-shell--clouds > .test-card {
+  margin: auto;
+}
+
+.test-shell--mist > .test-card {
+  margin-block: auto;
+}
+
+.test-card--narrow {
+  max-width: 860px;
+}
+
+/* Karta tekstowa (powitanie / zakończenie) */
+.test-info-card {
+  border-radius: 24px;
+  background-color: #ffffff;
+  box-shadow: 0 10px 30px rgba(90, 8, 45, 0.08);
+}
+
+.test-info-card p {
+  font-size: 1.155rem; /* +10% */
+}
+
+/* Tytuł sekcji – berry, uppercase */
+.test-section-title {
+  color: var(--brand-berry);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 400;
+  font-size: 1.75rem;
+  margin-bottom: 4.25rem; /* odstęp tytuł → reszta tekstu (-5% x3) */
+}
+
+/* Akapit główny → akapit „Zaufaj…”: o jeden „enter” niżej */
+.test-lead-gap {
+  margin-bottom: 2.65rem;
+}
+
+/* Karta tekstowa – większe odstępy góra/dół wokół treści */
+.test-info-card__body {
+  padding-top: 3.5rem;
+  padding-bottom: 4.43rem; /* dolny margines sekcji +15% */
+  padding-left: 1.575rem; /* boczne odstępy +5% */
+  padding-right: 1.575rem;
+}
+
+@media (min-width: 768px) {
+  .test-info-card__body {
+    padding-top: 4.5rem;
+    padding-bottom: 5.69rem; /* dolny margines sekcji +15% */
+    padding-left: 3.15rem; /* boczne odstępy +5% */
+    padding-right: 3.15rem;
+  }
+}
+
+/* Opis z backendu – zachowanie podziałów linii (plain text) */
+.test-desc--prewrap {
+  white-space: pre-line;
+}
+
+/* Atrapa demo – całość nieklikalna */
+.test-demo {
+  pointer-events: none;
+  user-select: none;
 }
 
 .test-question-card {
@@ -110,9 +221,23 @@ a:hover {
   box-shadow: 0 10px 30px rgba(90, 8, 45, 0.06);
 }
 
+/* Rząd skali – zawsze jeden poziomy rząd (nie zawija się) */
+.test-scale-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(0.3rem, 2.5vw, 1rem); /* desktop = 1rem (jak gap-3) */
+}
+
+/* Stwierdzenia – rozmiar tekstu (desktop = dotychczasowe fs-5) */
+.test-statement {
+  font-size: 1.25rem;
+}
+
 .test-scale-circle {
-  width: 56px;
-  height: 56px;
+  width: clamp(36px, 11vw, 56px);
+  height: clamp(36px, 11vw, 56px);
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -167,6 +292,33 @@ a:hover {
   opacity: 0.6;
 }
 
+/* Duże przyciski CTA (DALEJ / ROZPOCZNIJ) – pełna pigułka, ciemny bordowy */
+.btn-lg {
+  border-radius: 999px;
+  /* poziomy padding skaluje się z szerokością okna: telefon → desktop */
+  padding: 0.4rem clamp(2rem, 12vw, 6.9rem);
+  max-width: 100%;
+  font-weight: 500;
+  letter-spacing: 1px;
+  font-size: 1rem; /* napis -20% (z 1.25rem) */
+}
+
+/* Odstęp karta → przycisk CTA (+10%) */
+.test-cta {
+  margin-top: 3.63rem;
+}
+
+.btn-primary.btn-lg {
+  background-color: var(--brand-ink);
+  border-color: var(--brand-ink);
+}
+
+.btn-primary.btn-lg:hover,
+.btn-primary.btn-lg:focus {
+  background-color: var(--brand-berry);
+  border-color: var(--brand-berry);
+}
+
 .btn-outline-secondary {
   background-color: #f8fafc;
   border-color: var(--brand-mist);
@@ -206,4 +358,25 @@ h1, h2, h3, h4, h5, h6 {
 
 .navbar {
   font-family: "Strawford", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ===== MOBILE (≤576px) ===== */
+@media (max-width: 576px) {
+  /* mniejsze paddingi, żeby rząd kropek się zmieścił */
+  .test-shell {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .test-shell--mist,
+  .test-shell--clouds {
+    padding: 1.25rem;
+  }
+
+  /* stwierdzenia w 2 wąskich kolumnach – mniejszy tekst + separator */
+  .test-statement {
+    font-size: clamp(0.9rem, 4.2vw, 1.05rem);
+  }
+  .test-statements > [class*="col-"]:first-child {
+    border-right: 1px solid var(--brand-mist);
+  }
 }
