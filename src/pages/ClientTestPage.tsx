@@ -24,6 +24,9 @@ import Col from "react-bootstrap/Col";
 
 type Phase = "welcome" | "demo" | "in-progress" | "finished";
 
+// czy z backendu przyszedł niepusty opis (fallback gdy null/pusty/same spacje)
+const hasText = (s?: string | null): s is string => !!s && s.trim().length > 0;
+
 const SCALE_OPTIONS: {
   value: AnswerValue;
   label: string;
@@ -220,17 +223,25 @@ export function ClientTestPage() {
                 Profil świadomości finansowej
               </h2>
 
-              <p className="test-lead-gap">
-                Przed Tobą {total} par stwierdzeń o pieniądzach
-                i biznesie. Przy każdej parze wybierz zdanie, które opisuje, jak
-                myślisz i zachowujesz się na co dzień. Niektóre pary mogą wydać
-                Ci się podobne - to zamierzone, wybieraj mimo to.
-              </p>
+              {hasText(rawData.descriptionBefore) ? (
+                <p className="test-desc--prewrap mb-0">
+                  {rawData.descriptionBefore}
+                </p>
+              ) : (
+                <>
+                  <p className="test-lead-gap">
+                    Przed Tobą {total} par stwierdzeń o pieniądzach
+                    i biznesie. Przy każdej parze wybierz zdanie, które opisuje, jak
+                    myślisz i zachowujesz się na co dzień. Niektóre pary mogą wydać
+                    Ci się podobne - to zamierzone, wybieraj mimo to.
+                  </p>
 
-              <p className="mb-0">
-                <strong>Zaufaj pierwszej myśli.</strong> Wypełnienie zajmie
-                około 20–25 minut.
-              </p>
+                  <p className="mb-0">
+                    <strong>Zaufaj pierwszej myśli.</strong> Wypełnienie zajmie
+                    około 20–25 minut.
+                  </p>
+                </>
+              )}
             </Card.Body>
           </Card>
 
@@ -265,21 +276,21 @@ export function ClientTestPage() {
 
             <Card className="test-question-card border-0">
               <Card.Body className="p-4 p-md-5">
-                <Row className="mt-2 align-items-start">
-                  <Col md={6} className="text-start">
-                    <div className="fw-semibold fs-5">
+                <Row className="mt-2 align-items-start test-statements">
+                  <Col xs={6} className="text-start">
+                    <div className="fw-semibold test-statement">
                       Zaczynam dzień od planu.
                     </div>
                   </Col>
-                  <Col md={6} className="text-end">
-                    <div className="fw-semibold fs-5">
+                  <Col xs={6} className="text-end">
+                    <div className="fw-semibold test-statement">
                       Zaczynam dzień od kawy, a potem zobaczymy.
                     </div>
                   </Col>
                 </Row>
 
                 <div className="mt-4 d-flex flex-column align-items-center">
-                  <div className="d-flex gap-3 flex-wrap justify-content-center mb-2">
+                  <div className="test-scale-row mb-2">
                     {SCALE_OPTIONS.map((opt) => {
                       const isSelected = opt.value === 0;
                       const bg = isSelected ? opt.color : `${opt.color}20`;
@@ -349,22 +360,30 @@ export function ClientTestPage() {
                 Profil świadomości finansowej
               </h2>
 
-              <p className="mb-3">
-                <strong>Dziękuję, że mi zaufałaś.</strong>
-              </p>
+              {hasText(rawData.descriptionAfter) ? (
+                <p className="test-desc--prewrap mb-0">
+                  {rawData.descriptionAfter}
+                </p>
+              ) : (
+                <>
+                  <p className="mb-3">
+                    <strong>Dziękuję, że mi zaufałaś.</strong>
+                  </p>
 
-              <p className="mb-3">
-                Wypełnienie tego profilu wymaga odwagi i szczerości wobec siebie
-                i właśnie to zrobiłaś.
-              </p>
+                  <p className="mb-3">
+                    Wypełnienie tego profilu wymaga odwagi i szczerości wobec siebie
+                    i właśnie to zrobiłaś.
+                  </p>
 
-              <p className="mb-3">
-                Twoje odpowiedzi są teraz u mnie. W ciągu 48 godzin
-                przeanalizuję je i wyślę Ci wynik na adres e-mail, który
-                podałaś.
-              </p>
+                  <p className="mb-3">
+                    Twoje odpowiedzi są teraz u mnie. W ciągu 48 godzin
+                    przeanalizuję je i wyślę Ci wynik na adres e-mail, który
+                    podałaś.
+                  </p>
 
-              <p className="mb-0">Agnieszka Kotlonek-Wójcik</p>
+                  <p className="mb-0">Agnieszka Kotlonek-Wójcik</p>
+                </>
+              )}
             </Card.Body>
           </Card>
         </Container>
@@ -445,14 +464,14 @@ export function ClientTestPage() {
         {/* Karta pytania */}
         <Card className="test-question-card border-0">
           <Card.Body className="p-4 p-md-5">
-            <Row className="mt-2 align-items-start">
-              <Col md={6} className="text-start">
-                <div className="fw-semibold fs-5">
+            <Row className="mt-2 align-items-start test-statements">
+              <Col xs={6} className="text-start">
+                <div className="fw-semibold test-statement">
                   {currentQuestion.leftText}
                 </div>
               </Col>
-              <Col md={6} className="text-end">
-                <div className="fw-semibold fs-5">
+              <Col xs={6} className="text-end">
+                <div className="fw-semibold test-statement">
                   {currentQuestion.rightText}
                 </div>
               </Col>
@@ -460,7 +479,7 @@ export function ClientTestPage() {
 
             {/* Skala z kolorowymi kulkami – BEZ liczb */}
             <div className="mt-4 d-flex flex-column align-items-center">
-              <div className="d-flex gap-3 flex-wrap justify-content-center mb-2">
+              <div className="test-scale-row mb-2">
                 {scaleOptions.map((opt) => {
                   const isSelected = currentAnswer?.value === opt.value;
                   const bg = isSelected ? opt.color : `${opt.color}20`;

@@ -112,7 +112,7 @@ a:hover {
 
 .test-shell {
   min-height: calc(100vh - 72px);
-  padding: 2.5rem 0 3rem;
+  padding: 2.5rem 1.5rem 3rem;
 }
 
 /* Tło – chmury (powitanie, zakończenie) */
@@ -122,17 +122,38 @@ a:hover {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  padding-top: 4.5rem; /* całość (karta + przycisk) niżej */
+
+  /* Centrowanie całości (karta + przycisk) – scroll-safe (margin:auto na dziecku).
+     min-height = 100vh − belka, więc odstęp góra (od belki) = dół,
+     a poziome centrowanie daje lewo = prawo. */
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem; /* równy odstęp ze wszystkich stron */
 }
 
-/* Tło – szare z palety (#c0ccd9) – demo i test właściwy */
+/* Tło – jasne z palety (#ecf1f6) – demo i test właściwy */
 .test-shell--mist {
-  background-color: var(--brand-mist);
+  background-color: var(--brand-cloud);
+
+  /* Wariant B: centrowanie w pionie przez margin:auto na dziecku (scroll-safe) */
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem; /* równy odstęp ze wszystkich stron */
 }
 
 .test-card {
   max-width: 960px;
   margin: 0 auto;
+}
+
+/* Scroll-safe centrowanie zawartości w obu typach plansz:
+   gdy jest miejsce – wyśrodkowane; gdy treść wyższa niż okno – scroll bez ucinania */
+.test-shell--clouds > .test-card {
+  margin: auto;
+}
+
+.test-shell--mist > .test-card {
+  margin-block: auto;
 }
 
 .test-card--narrow {
@@ -182,6 +203,11 @@ a:hover {
   }
 }
 
+/* Opis z backendu – zachowanie podziałów linii (plain text) */
+.test-desc--prewrap {
+  white-space: pre-line;
+}
+
 /* Atrapa demo – całość nieklikalna */
 .test-demo {
   pointer-events: none;
@@ -195,9 +221,23 @@ a:hover {
   box-shadow: 0 10px 30px rgba(90, 8, 45, 0.06);
 }
 
+/* Rząd skali – zawsze jeden poziomy rząd (nie zawija się) */
+.test-scale-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(0.3rem, 2.5vw, 1rem); /* desktop = 1rem (jak gap-3) */
+}
+
+/* Stwierdzenia – rozmiar tekstu (desktop = dotychczasowe fs-5) */
+.test-statement {
+  font-size: 1.25rem;
+}
+
 .test-scale-circle {
-  width: 56px;
-  height: 56px;
+  width: clamp(36px, 11vw, 56px);
+  height: clamp(36px, 11vw, 56px);
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -255,7 +295,9 @@ a:hover {
 /* Duże przyciski CTA (DALEJ / ROZPOCZNIJ) – pełna pigułka, ciemny bordowy */
 .btn-lg {
   border-radius: 999px;
-  padding: 0.4rem 6.9rem; /* dłuższy i cieńszy */
+  /* poziomy padding skaluje się z szerokością okna: telefon → desktop */
+  padding: 0.4rem clamp(2rem, 12vw, 6.9rem);
+  max-width: 100%;
   font-weight: 500;
   letter-spacing: 1px;
   font-size: 1rem; /* napis -20% (z 1.25rem) */
@@ -316,4 +358,25 @@ h1, h2, h3, h4, h5, h6 {
 
 .navbar {
   font-family: "Strawford", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ===== MOBILE (≤576px) ===== */
+@media (max-width: 576px) {
+  /* mniejsze paddingi, żeby rząd kropek się zmieścił */
+  .test-shell {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .test-shell--mist,
+  .test-shell--clouds {
+    padding: 1.25rem;
+  }
+
+  /* stwierdzenia w 2 wąskich kolumnach – mniejszy tekst + separator */
+  .test-statement {
+    font-size: clamp(0.9rem, 4.2vw, 1.05rem);
+  }
+  .test-statements > [class*="col-"]:first-child {
+    border-right: 1px solid var(--brand-mist);
+  }
 }

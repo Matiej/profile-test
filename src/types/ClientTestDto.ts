@@ -8,8 +8,8 @@ export type ClientQuestionDto = {
 
 export type ClientTestDto = {
     testName: string;
-    descriptionBefore: string;
-    descriptionAfter: string;
+    descriptionBefore?: string | null;
+    descriptionAfter?: string | null;
     publicToken: string;
     submissionId: string;
     clientQuestions: ClientQuestionDto[];
