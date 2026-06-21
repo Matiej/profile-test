@@ -6,7 +6,7 @@ export function NotFoundPage() {
       <Container className="text-center mt-3">
         <h1>Nie znaleźliśmy tej strony</h1>
         <p className="mb-2">
-          Coś poszło nie tak albo tej strony już nie ma. Nic straconego — jeśli
+          Coś poszło nie tak albo tej strony już nie ma. Nic straconego, jeśli
           masz pytania, chętnie pomogę.
         </p>
         <p className="mb-0">
