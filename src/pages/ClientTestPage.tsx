@@ -278,7 +278,7 @@ export function ClientTestPage() {
       <div className="test-shell test-shell--mist">
         <Container className="test-card">
           <h2 className="text-center mb-4 test-demo-title">
-            Zanim zaczniesz, zobacz jak to działa
+            Zanim zaczniesz, zobacz jak to działa.
           </h2>
 
           <div className="test-demo-intro">

@@ -71,8 +71,10 @@ body {
   color: var(--brand-text);
 }
 
-#rooot {
+#root {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Linki */
@@ -140,7 +142,10 @@ a:hover {
 /* ===== KLASY TESTU ===== */
 
 .test-shell {
-  min-height: calc(100vh - 72px);
+  /* wypełnia dokładnie obszar pod belką (belka = naturalna wysokość, shell = reszta),
+     bez sztywnego odejmowania 72px → brak fałszywego paska przewijania */
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 2.5rem 1.5rem 3rem;
 }
 
@@ -193,11 +198,13 @@ a:hover {
   margin-block: 0;
 }
 
-/* Tytuł na ekranie pytań – równy odstęp od belki (góra = padding shella)
-   i od sekcji testu (dół = margin-bottom) */
-.test-page-title {
+/* Tytuł na ekranie pytań – równy odstęp od belki (góra = padding shella 2.5rem)
+   i od sekcji testu (dół = margin-bottom 2.5rem).
+   Selektor łączony (.test-section-title.test-page-title) podbija specyficzność,
+   inaczej późniejsza reguła .test-section-title { margin-bottom: 4.25rem } wygrywa. */
+.test-section-title.test-page-title {
   margin-top: 0;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.0rem;
 }
 
 /* Dwa stałe akapity na ekranie demo (pod tytułem, nad atrapą) */
@@ -443,8 +450,8 @@ h1, h2, h3, h4, h5, h6 {
     padding: 1.25rem;
   }
 
-  /* równo z mobilnym paddingiem shella */
-  .test-page-title {
+  /* równo z mobilnym paddingiem shella (selektor łączony – jak wyżej) */
+  .test-section-title.test-page-title {
     margin-bottom: 1.25rem;
   }
 
