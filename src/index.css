@@ -136,7 +136,14 @@ a:hover {
   font-weight: 400;
   letter-spacing: 0.5px;
   color: var(--brand-text);
-  font-size: 1.7rem;  
+  font-size: clamp(0.95rem, 3.6vw, 1.7rem);
+  line-height: 1.2;
+  /* nie rozpychaj gridu poza ekran – zawijaj długi tytuł */
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  text-wrap: balance;
 }
 
 /* ===== KLASY TESTU ===== */
@@ -440,6 +447,12 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ===== MOBILE (≤576px) ===== */
 @media (max-width: 576px) {
+  /* węższa belka na telefonie – mniej paddingu, więcej miejsca na tytuł */
+  .top-bar {
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
   /* mniejsze paddingi, żeby rząd kropek się zmieścił */
   .test-shell {
     padding-left: 1rem;
