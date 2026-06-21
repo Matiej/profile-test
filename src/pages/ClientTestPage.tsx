@@ -33,37 +33,50 @@ const SCALE_OPTIONS: {
   variant: string;
   color: string;
 }[] = [
+  // wszystkie kółka jednolicie szare (jak środkowe); hover/active → bordowy (CSS)
   {
     value: -2,
     label: "Zdecydowanie bardziej LEWY",
-    variant: "danger",
-    color: "#ef4444", // mocny czerwony
+    variant: "secondary",
+    color: "#64748b",
   },
   {
     value: -1,
     label: "Bardziej LEWY",
-    variant: "danger",
-    color: "#fecaca", // jasny czerwony
+    variant: "secondary",
+    color: "#64748b",
   },
   {
     value: 0,
     label: "Pośrodku",
     variant: "secondary",
-    color: "#64748b", // szary – zostaje
+    color: "#64748b",
   },
   {
     value: 1,
     label: "Bardziej PRAWY",
-    variant: "primary",
-    color: "#bfdbfe", // jasny niebieski
+    variant: "secondary",
+    color: "#64748b",
   },
   {
     value: 2,
     label: "Zdecydowanie bardziej PRAWY",
-    variant: "primary",
-    color: "#0ea5e9", // mocny niebieski
+    variant: "secondary",
+    color: "#64748b",
   },
 ];
+
+// Tytuł testu – jedno źródło tekstu i stylu (welcome, finished, ekran pytań).
+// Zmiana tutaj / w klasie .test-section-title zmienia wygląd we wszystkich miejscach.
+const TEST_TITLE_TEXT = "Profil świadomości finansowej";
+
+function TestTitle({ className }: { className?: string }) {
+  return (
+    <h2 className={clsx("test-section-title text-center", className)}>
+      {TEST_TITLE_TEXT}
+    </h2>
+  );
+}
 
 export function ClientTestPage() {
   const { publicToken } = useParams<{ publicToken: string }>();
@@ -165,6 +178,12 @@ export function ClientTestPage() {
           : a
       )
     );
+
+    // po wyborze – natychmiast następne stwierdzenie (krótki efekt zaznaczenia).
+    // Na ostatnim pytaniu zostaje przycisk „Zakończ test".
+    if (currentIndex < total - 1) {
+      window.setTimeout(() => setCurrentIndex((idx) => idx + 1), 120);
+    }
   };
 
   const handleNext = () => {
@@ -219,9 +238,7 @@ export function ClientTestPage() {
         <Container className="test-card test-card--narrow">
           <Card className="test-info-card border-0">
             <Card.Body className="test-info-card__body">
-              <h2 className="test-section-title text-center">
-                Profil świadomości finansowej
-              </h2>
+              <TestTitle />
 
               {hasText(rawData.descriptionBefore) ? (
                 <p className="test-desc--prewrap mb-0">
@@ -260,9 +277,25 @@ export function ClientTestPage() {
     return (
       <div className="test-shell test-shell--mist">
         <Container className="test-card">
-          <h4 className="text-center mb-4">
-            Zanim zaczniesz, zobacz jak to działa.
-          </h4>
+          <h2 className="text-center mb-4 test-demo-title">
+            Zanim zaczniesz, zobacz jak to działa
+          </h2>
+
+          <div className="test-demo-intro">
+            <p className="mb-3">
+              Przy każdej parze zobaczysz dwa stwierdzenia, a Twoim zadaniem jest
+              zaznaczenie kropki, która najlepiej pokazuje, bliżej którego z nich
+              czujesz się na co dzień. Kropki na krawędziach oznaczają, że dane
+              stwierdzenie pasuje do Ciebie bardzo mocno, a środkowa kropka
+              oznacza, że oba zdania są dla Ciebie równie prawdziwe. W każdej
+              chwili możesz wrócić o jedną parę wstecz, jeśli chcesz coś poprawić.
+            </p>
+            <p className="mb-0">
+              Wybieraj odpowiedź, która przychodzi Ci do głowy jako pierwsza, bo
+              to ona najlepiej pokazuje, jak naprawdę myślisz i działasz, nie to,
+              jak byś chciała, żeby było.
+            </p>
+          </div>
 
           {/* Atrapa karty pytania – w pełni statyczna, nieklikalna */}
           <div className="test-demo" aria-hidden="true">
@@ -356,9 +389,7 @@ export function ClientTestPage() {
         <Container className="test-card test-card--narrow">
           <Card className="test-info-card border-0">
             <Card.Body className="test-info-card__body">
-              <h2 className="test-section-title text-center">
-                Profil świadomości finansowej
-              </h2>
+              <TestTitle />
 
               {hasText(rawData.descriptionAfter) ? (
                 <p className="test-desc--prewrap mb-0">
@@ -381,7 +412,17 @@ export function ClientTestPage() {
                     podałaś.
                   </p>
 
-                  <p className="mb-0">Agnieszka Kotlonek-Wójcik</p>
+                  <p className="mb-1">Agnieszka Kotlonek-Wójcik</p>
+                  <p className="mb-0">
+                    <a
+                      className="test-www-link"
+                      href="https://www.agnieszkakotlonek.pl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      www.agnieszkakotlonek.pl
+                    </a>
+                  </p>
                 </>
               )}
             </Card.Body>
@@ -448,7 +489,8 @@ export function ClientTestPage() {
   };
 
   return (
-    <div className="test-shell test-shell--mist">
+    <div className="test-shell test-shell--mist test-shell--top">
+      <TestTitle className="test-page-title" />
       <Container className="test-card">
         {/* Pasek postępu */}
         <div className="mb-3">
