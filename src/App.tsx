@@ -52,9 +52,14 @@ function App() {
           </a>
         </div>
 
-        <span className="top-bar__title">
+        <a
+          className="top-bar__title"
+          href="https://agnieszkakotlonek.pl/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Agnieszka Kotlonek Hipnoza w Biznesie
-        </span>
+        </a>
       </header>
 
       <Routes>
