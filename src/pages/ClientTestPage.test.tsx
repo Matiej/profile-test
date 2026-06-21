@@ -8,7 +8,7 @@ import { getClientTest, submitClientTest } from "./apiClientTest";
 import { ApiError } from "../lib/httpClient";
 import type { ClientTestDto, ClientQuestionDto } from "../types/ClientTestDto";
 
-// Mock warstwy API – bez sieci
+// Mock the API layer – no network
 vi.mock("./apiClientTest", () => ({
   getClientTest: vi.fn(),
   submitClientTest: vi.fn(),
@@ -22,8 +22,8 @@ function makeQuestion(i: number): ClientQuestionDto {
     id: `id-${i}`,
     statementKey: `key-${i}`,
     statementCategory: "cat",
-    supportingStatement: `Wspierające ${i}`,
-    limitingStatement: `Ograniczające ${i}`,
+    supportingStatement: `Supporting ${i}`,
+    limitingStatement: `Limiting ${i}`,
   };
 }
 
@@ -51,7 +51,7 @@ function renderAt(token: string | null = "tok-1") {
   );
 }
 
-// klikanie kropek skali (Buttony bez dostępnej nazwy – po klasie)
+// click scale circles (Buttons without an accessible name – select by class)
 function scaleCircles(container: HTMLElement) {
   return Array.from(
     container.querySelectorAll<HTMLElement>(".test-scale-circle")
@@ -60,33 +60,33 @@ function scaleCircles(container: HTMLElement) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // deterministyczne ułożenie lewo/prawo (Math.random < 0.5 => supporting po lewej)
+  // deterministic left/right layout (Math.random < 0.5 => supporting on the left)
   vi.spyOn(Math, "random").mockReturnValue(0.1);
   submitClientTestMock.mockResolvedValue(undefined);
 });
 
-describe("ClientTestPage – stany brzegowe", () => {
-  it("bez publicToken pokazuje NotFoundPage", async () => {
+describe("ClientTestPage – edge cases", () => {
+  it("shows NotFoundPage when publicToken is missing", async () => {
     renderAt(null);
     expect(
-      await screen.findByText(/Strona nie została znaleziona/i)
+      await screen.findByText(/Nie znaleźliśmy tej strony/i)
     ).toBeInTheDocument();
     expect(getClientTestMock).not.toHaveBeenCalled();
   });
 
-  it("przy ApiError 404 pokazuje NotFoundPage", async () => {
+  it("shows NotFoundPage on ApiError 404", async () => {
     getClientTestMock.mockRejectedValue(
       new ApiError({ status: 404, code: "NOT_FOUND", error: "x", message: "x" })
     );
     renderAt();
     expect(
-      await screen.findByText(/Strona nie została znaleziona/i)
+      await screen.findByText(/Nie znaleźliśmy tej strony/i)
     ).toBeInTheDocument();
   });
 });
 
-describe("ClientTestPage – przepływ faz", () => {
-  it("welcome → demo → pytanie", async () => {
+describe("ClientTestPage – phase flow", () => {
+  it("welcome → demo → question", async () => {
     getClientTestMock.mockResolvedValue(makeDto());
     const user = userEvent.setup();
     renderAt();
@@ -101,8 +101,8 @@ describe("ClientTestPage – przepływ faz", () => {
   });
 });
 
-describe("ClientTestPage – fallback opisów", () => {
-  it("descriptionBefore z backendu zastępuje tekst zaszyty", async () => {
+describe("ClientTestPage – description fallback", () => {
+  it("descriptionBefore from backend replaces the hardcoded text", async () => {
     getClientTestMock.mockResolvedValue(
       makeDto({ descriptionBefore: "Tekst z backendu PRZED" })
     );
@@ -113,15 +113,15 @@ describe("ClientTestPage – fallback opisów", () => {
     expect(screen.queryByText(/Przed Tobą/i)).not.toBeInTheDocument();
   });
 
-  it("pusty descriptionBefore pokazuje tekst zaszyty (fallback)", async () => {
+  it("empty descriptionBefore shows the hardcoded text (fallback)", async () => {
     getClientTestMock.mockResolvedValue(makeDto({ descriptionBefore: "  " }));
     renderAt();
     expect(await screen.findByText(/Przed Tobą/i)).toBeInTheDocument();
   });
 });
 
-describe("ClientTestPage – odpowiadanie i submit", () => {
-  it("'Dalej' jest zablokowany dopóki nie wybrano odpowiedzi", async () => {
+describe("ClientTestPage – answering and submit", () => {
+  it("'Dalej' is disabled until an answer is selected; clicking a circle advances to the next question", async () => {
     getClientTestMock.mockResolvedValue(makeDto());
     const user = userEvent.setup();
     const { container } = renderAt();
@@ -131,14 +131,14 @@ describe("ClientTestPage – odpowiadanie i submit", () => {
     await user.click(screen.getByRole("button", { name: /rozpocznij/i }));
     await screen.findByText(/Krok 1 z 2/i);
 
-    const next = screen.getByRole("button", { name: /^dalej$/i });
-    expect(next).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^dalej$/i })).toBeDisabled();
 
+    // click circle → auto-advance to the next statement
     await user.click(scaleCircles(container)[2]);
-    expect(next).toBeEnabled();
+    expect(await screen.findByText(/Krok 2 z 2/i)).toBeInTheDocument();
   });
 
-  it("przejście do ostatniego pytania i wysłanie odpowiedzi", async () => {
+  it("advances to the last question and submits the answers", async () => {
     getClientTestMock.mockResolvedValue(
       makeDto({ descriptionAfter: "Dziękuję z backendu" })
     );
@@ -150,11 +150,10 @@ describe("ClientTestPage – odpowiadanie i submit", () => {
     await user.click(screen.getByRole("button", { name: /rozpocznij/i }));
     await screen.findByText(/Krok 1 z 2/i);
 
-    // pytanie 1
+    // question 1 → clicking a circle auto-advances to question 2
     await user.click(scaleCircles(container)[2]);
-    await user.click(screen.getByRole("button", { name: /^dalej$/i }));
 
-    // pytanie 2 (ostatnie)
+    // question 2 (last) – no auto-advance, "Zakończ test" remains
     await screen.findByText(/Krok 2 z 2/i);
     await user.click(scaleCircles(container)[3]);
 
@@ -167,11 +166,11 @@ describe("ClientTestPage – odpowiadanie i submit", () => {
     expect(payload.publicToken).toBe("tok-1");
     expect(payload.clientTestAnswers).toHaveLength(2);
 
-    // ekran końcowy z opisem z backendu
+    // finish screen with backend description
     expect(await screen.findByText("Dziękuję z backendu")).toBeInTheDocument();
   });
 
-  it("błąd submitu pokazuje komunikat i nie przechodzi do końca", async () => {
+  it("submit error shows a message and does not advance to the finish screen", async () => {
     getClientTestMock.mockResolvedValue(makeDto());
     submitClientTestMock.mockRejectedValue(new Error("boom"));
     const user = userEvent.setup();
@@ -183,7 +182,6 @@ describe("ClientTestPage – odpowiadanie i submit", () => {
     await screen.findByText(/Krok 1 z 2/i);
 
     await user.click(scaleCircles(container)[2]);
-    await user.click(screen.getByRole("button", { name: /^dalej$/i }));
     await screen.findByText(/Krok 2 z 2/i);
     await user.click(scaleCircles(container)[3]);
     await user.click(screen.getByRole("button", { name: /zakończ test/i }));
@@ -191,7 +189,7 @@ describe("ClientTestPage – odpowiadanie i submit", () => {
     expect(
       await screen.findByText(/Nie udało się zapisać odpowiedzi/i)
     ).toBeInTheDocument();
-    // nadal na karcie pytania, nie na ekranie podziękowania
+    // still on the question card, not the thank-you screen
     expect(within(document.body).queryByText(/Dziękuję/i)).not.toBeInTheDocument();
   });
 });
